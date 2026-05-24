@@ -228,7 +228,7 @@ class Maze:
                             # sum of distances is at least <degree>. Due to the
                             # invariant on dist1/dist2 within setx and sety, there
                             # cannot exist a shorter path. Therefore, distance
-                            # between <x> and <y> is less than <degree>.
+                            # between <x> and <y> is greater than <degree>.
                             return False
                     n.dist1 = currx.dist1 + 1
                     setx.add(n.getVertex())
