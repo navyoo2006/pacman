@@ -4,62 +4,57 @@ from collections import deque
 import random
 import time
 
-class MazeNode:
-    """ === MazeNode ===
-    This class serves as both a node within a connected component to be used in
-    the DisjointSetUnion class, as well as a node within a maze grid with 0 to
-    4 neighbors to be used in the Maze class.
-    """
+class DisjointSet:
     def __init__(self, vertex):
         # Connected component features:
         self.vertex = vertex
         self.parent = None
         self.children = []
         self.size = 1
-
-        # Maze node features:
-        self._neighbors = []
-        # Distances from a reference node. May be overwritten.
-        self.dist1 = 0
-        self.dist2 = 0
-    def getNeighbors(self):
-        return self._neighbors
-    def addNeighbor(self, other):
-        self._neighbors.append(other)
-        other._neighbors.append(self)
+    
     def setParent(self, parent):
         self.parent = parent
         self.parent.children.append(self)
         self.parent.size += self.size
+
     def getParent(self):
         return self.parent
+    
     def getSize(self):
         return self.size
+    
     def __eq__(self, other):
         return self.vertex == other.vertex
-    def isNeighbor(self, vertex):
-        for n in self._neighbors:
-            if vertex == n.getVertex():
-                return True
-        return False
+    
     def find(self):
         curr = self
+
         while curr.getParent() is not None:
             curr = curr.getParent()
+
         return curr
+    
     def getVertex(self):
         return self.vertex
+    
     def _strHelper(self):
         string = ""
+
         if self.parent is None:
             string += "{"
+
         string += str(self.vertex)
+
         for child in self.children:
             string += ", " + child._strHelper()
+
         if self.parent is None:
             string += "}"
+
         return string
+    
     def __str__(self):
+
         """ String representation of the connected component.
         Pre-order traversal of tree rooted at the representative.
         Example:
@@ -72,9 +67,51 @@ class MazeNode:
         (6,4)  (4,3)  (4,1)  (5,2)
         
         self.__str__(): '{(5, 3), (5, 4), (6, 4), (4, 3), (4, 2), (4, 1), (5, 2)}'
-        """ 
+        """
         rep = self.find()
         return rep._strHelper()
+
+class Square:
+    def __init__(self, vertex):
+
+        # Maze node features:
+        self._neighbors = []
+        self.vertex = vertex
+
+        # Distances from a reference node. May be overwritten.
+        self.dist1 = 0
+        self.dist2 = 0
+
+    def getNeighbors(self):
+        return self._neighbors
+        
+    def addNeighbor(self, other):
+        self._neighbors.append(other)
+        other._neighbors.append(self)
+
+    def isNeighbor(self, vertex):
+
+        for n in self._neighbors:
+            if vertex == n.getVertex():
+                return True
+            
+        return False
+    
+    def __eq__(self, other):
+        return self.vertex == other.vertex
+    
+    def getVertex(self):
+        return self.vertex
+
+class MazeNode:
+    """ === MazeNode ===
+    This class serves as both a node within a connected component to be used in
+    the DisjointSetUnion class, as well as a node within a maze grid with 0 to
+    4 neighbors to be used in the Maze class.
+    """
+    def __init__(self, vertex):
+        self.square = Square(vertex)
+        self.disjointSet = DisjointSet(vertex)
 
 class DisjointSetUnion:
     """ === DisjointSetUnion ===
@@ -257,46 +294,46 @@ class Maze:
             for y in range(self.height - 1):
                 edgesLst.append((self.graph[(x, y)], self.graph[(x + 1, y)]))
                 edgesLst.append((self.graph[(x, y)], self.graph[(x, y + 1)]))
-                dsu.makeSet(self.graph[(x, y)])
+                dsu.makeSet(self.graph[(x, y)].disjointSet)
         for x in range(self.width - 1):
             edgesLst.append((self.graph[(x, self.height - 1)], self.graph[(x + 1, self.height - 1)]))
-            dsu.makeSet(self.graph[(x, self.height - 1)])
+            dsu.makeSet(self.graph[(x, self.height - 1)].disjointSet)
         for y in range(self.height - 1):
             edgesLst.append((self.graph[(self.width - 1, y)], self.graph[(self.width - 1, y + 1)]))
-            dsu.makeSet(self.graph[(self.width - 1, y)])
-        dsu.makeSet(self.graph[(self.width - 1, self.height - 1)])
+            dsu.makeSet(self.graph[(self.width - 1, y)].disjointSet)
+        dsu.makeSet(self.graph[(self.width - 1, self.height - 1)].disjointSet)
         random.shuffle(edgesLst)
         edges = deque(edgesLst)
         while len(edges) > 0:
             edge = edges.popleft()
             vertex1 = edge[0]
             vertex2 = edge[1]
-            isDisjoint = dsu.union(vertex1, vertex2)
+            isDisjoint = dsu.union(vertex1.disjointSet, vertex2.disjointSet)
             if isDisjoint:
-                vertex1.addNeighbor(vertex2)
+                vertex1.square.addNeighbor(vertex2.square)
             else:
-                isSmallCycle = self._lessThanDegree(vertex1, vertex2, 6)
+                isSmallCycle = self._lessThanDegree(vertex1.square, vertex2.square, 6)
                 if not isSmallCycle:
-                    vertex1.addNeighbor(vertex2)
+                    vertex1.square.addNeighbor(vertex2.square)
     def __str__(self):
         string = ""
         for x in range(self.width - 1):
-            if self.graph[(x, 0)].isNeighbor((x + 1, 0)):
+            if self.graph[(x, 0)].square.isNeighbor((x + 1, 0)):
                 string += "__"
             else:
                 string += "  "
         string += "\n"
         for y in range(1, self.height):
             for x in range(self.width - 1):
-                if self.graph[(x, y)].isNeighbor(((x, y - 1))):
+                if self.graph[(x, y)].square.isNeighbor(((x, y - 1))):
                     string += "|"
                 else:
                     string += ","
-                if self.graph[(x, y)].isNeighbor(((x + 1, y))):
+                if self.graph[(x, y)].square.isNeighbor(((x + 1, y))):
                     string += "_"
                 else:
                     string += " "
-            if self.graph[(self.width - 1, y)].isNeighbor(((self.width - 1, y - 1))):
+            if self.graph[(self.width - 1, y)].square.isNeighbor(((self.width - 1, y - 1))):
                 string += "|"
             else:
                 string += ","
