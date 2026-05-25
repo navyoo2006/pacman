@@ -9,8 +9,6 @@ class MazeNode:
     This class serves as both a node within a connected component to be used in
     the DisjointSetUnion class, as well as a node within a maze grid with 0 to
     4 neighbors to be used in the Maze class.
-    A non-binary tree representing a connected component where the root of
-    the tree is the representative of the component.
     """
     def __init__(self, vertex):
         # Connected component features:
