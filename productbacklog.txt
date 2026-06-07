@@ -1,0 +1,13 @@
+===============================================================
+BUG1 - Configure DJango - Navid Yoosefi
+Estimated time: 3 Days
+Actual time:
+Status: NOT DONE
+===============================================================
+
+===============================================================
+BUG2 - Create test suite for Maze and DisjointSetUnion - Methsaan Wickramasinghe
+Estimated time: 4 days
+Actual time:
+Status: NOT DONE
+===============================================================

@@ -27,6 +27,6 @@
 ## To-do:
 - [X] Maze generation: Generate a random pacman maze with cycle sizes of at least 6
 - [ ] Create and run test suite for DSU, MazeNode and Maze
-- [ ] Start sprint workflow
+- [X] Start sprint workflow
 - [ ] Set up DJango framework
 - [ ] Ghost movement: Efficiently track shortest path continuously with moving targets
